@@ -232,8 +232,7 @@ initDevice (cudaDeviceProp * prop)
 		if (count > 0) {
 			error = cudaSetDevice(0);
 			if (error == cudaSuccess) {
-				//device found -> write the properties inside prop
-				error = cudaGetDeviceProperties(&prop, 0);
+				error = cudaGetDeviceProperties(prop, 0);
 			}
 		}
 	}

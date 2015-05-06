@@ -1,0 +1,63 @@
+------------------------------------------
+Device:                  0
+Name:                    Tesla K20c
+Compute Capability:      3.5
+Global Memory:           5119 MB
+Clock rate:              705 MHz
+Multiprocessor count:    13
+Max. threads per block:  1024
+Max. threads per dim:    1024 x 1024 x 64
+Max. grid size:          2147483647 x 65535 x 65535
+Shared Memory per block: 49152 Byte
+Register per block:      65536
+Warp size:               32
+Memory pitch:            2147483647
+------------------------------------------
+
+134217728 Bytes of global memory allocated
+==========================================
+Benchmark: Memcpy Host to Device
+Result: copied 1 MB in 0.247142 ms with 4046.25 MB/s
+Result: copied 2 MB in 0.392317 ms with 5097.92 MB/s
+Result: copied 4 MB in 0.716432 ms with 5583.22 MB/s
+Result: copied 8 MB in 1.40744 ms with 5684.08 MB/s
+Result: copied 16 MB in 2.76701 ms with 5782.41 MB/s
+Result: copied 32 MB in 5.49557 ms with 5822.87 MB/s
+Result: copied 64 MB in 10.94 ms with 5850.11 MB/s
+Result: copied 128 MB in 21.8538 ms with 5857.12 MB/s
+==========================================
+
+134217728 Bytes of page-locked host memory allocated
+==========================================
+Benchmark: Memcpy Host to Device
+(page-locked host memory)
+Result: copied 1 MB in 0.168038 ms with 5951.02 MB/s
+Result: copied 2 MB in 0.331824 ms with 6027.29 MB/s
+Result: copied 4 MB in 0.63832 ms with 6266.45 MB/s
+Result: copied 8 MB in 1.26679 ms with 6315.19 MB/s
+Result: copied 16 MB in 2.53378 ms with 6314.69 MB/s
+Result: copied 32 MB in 5.04574 ms with 6341.98 MB/s
+Result: copied 64 MB in 10.0676 ms with 6357.04 MB/s
+Result: copied 128 MB in 20.114 ms with 6363.72 MB/s
+==========================================
+
+134217728 Bytes of global memory allocated
+==========================================
+Benchmark: Memcpy Device to Device
+(global to global)
+Result: copied 1 MB in 0.0204128 ms with 48988.9 MB/s
+Result: copied 2 MB in 0.03144 ms with 63613.2 MB/s
+Result: copied 4 MB in 0.0559104 ms with 71543 MB/s
+Result: copied 8 MB in 0.104742 ms with 76377.9 MB/s
+Result: copied 16 MB in 0.202298 ms with 79091.4 MB/s
+Result: copied 32 MB in 0.396733 ms with 80658.8 MB/s
+Result: copied 64 MB in 0.787056 ms with 81315.7 MB/s
+Result: copied 128 MB in 1.56766 ms with 81650.3 MB/s
+==========================================
+
+==========================================
+Benchmark: Memcpy Device to Device 
+(global to shared memory) 
+ copying 8192 Bytes ....
+Result: copied in 0.156766ms   with 51031.4KB/s
+t

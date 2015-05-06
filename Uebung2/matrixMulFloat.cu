@@ -42,6 +42,7 @@ template <int BLOCK_SIZE> __global__ void
 matrixMulCUDA(float *C, float *A, float *B, int wA, int wB)
 {
 // FIXME
+
 }
 
 void constantInit(float *data, int size, float val)

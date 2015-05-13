@@ -66,6 +66,7 @@ void constantInit(float *data, int size, float val)
 
 int matrixMultiply(int argc, char **argv, int block_size, dim3 &dimsA, dim3 &dimsB)
 {
+	printf("=====================================\n");
     // Allocate host memory for matrices A and B
     unsigned int size_A = dimsA.x * dimsA.y;
     unsigned int mem_size_A = sizeof(float) * size_A;
@@ -232,6 +233,10 @@ int matrixMultiply(int argc, char **argv, int block_size, dim3 &dimsA, dim3 &dim
     float msecPerMatrixMul = msecTotal / nIter;
     double flopsPerMatrixMul = 2.0 * (double)dimsA.x * (double)dimsA.y * (double)dimsB.x;
     double gigaFlops = (flopsPerMatrixMul * 1.0e-9f) / (msecPerMatrixMul / 1000.0f);
+
+    double gF = gigaFlops * msecPerMatrixMul * 1000;
+    printf("> overall GFlops = %.2f\n", gF);
+
     printf(
         "Performance = %.2f GFlops/sec\nTime = %.3f msec\nSize = %.0f Ops\nWorkgroupSize = %u threads/block\n",
         gigaFlops,
@@ -280,7 +285,7 @@ int matrixMultiply(int argc, char **argv, int block_size, dim3 &dimsA, dim3 &dim
     cudaFree(d_C);
 
     cudaDeviceReset();
-
+    printf("=====================================\n");
     if (correct)
     {
         return EXIT_SUCCESS;

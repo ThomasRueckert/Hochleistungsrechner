@@ -39,7 +39,7 @@ struct config {
  * wA is A's width and wB is B's width
  */
 template <int BLOCK_SIZE> __global__ void
-matrixMulCUDA(float *C, float *A, float *B, int wA, int wB)
+matrixMulCUDA(double *C, double *A, double *B, int wA, int wB)
 {
 // FIXME
 
@@ -56,7 +56,7 @@ matrixMulCUDA(float *C, float *A, float *B, int wA, int wB)
 
 }
 
-void constantInit(float *data, int size, float val)
+void constantInit(double *data, int size, double val)
 {
     for (int i = 0; i < size; ++i)
     {
@@ -68,11 +68,11 @@ int matrixMultiply(int argc, char **argv, int block_size, dim3 &dimsA, dim3 &dim
 {
     // Allocate host memory for matrices A and B
     unsigned int size_A = dimsA.x * dimsA.y;
-    unsigned int mem_size_A = sizeof(float) * size_A;
-    float *h_A = (float *)malloc(mem_size_A);
+    unsigned int mem_size_A = sizeof(double) * size_A;
+    double *h_A = (double *)malloc(mem_size_A);
     unsigned int size_B = dimsB.x * dimsB.y;
-    unsigned int mem_size_B = sizeof(float) * size_B;
-    float *h_B = (float *)malloc(mem_size_B);
+    unsigned int mem_size_B = sizeof(double) * size_B;
+    double *h_B = (double *)malloc(mem_size_B);
 
     // Initialize host memory
     const float valB = 0.01f;
@@ -80,12 +80,12 @@ int matrixMultiply(int argc, char **argv, int block_size, dim3 &dimsA, dim3 &dim
     constantInit(h_B, size_B, valB);
 
     // Allocate device memory
-    float *d_A, *d_B, *d_C;
+    double *d_A, *d_B, *d_C;
 
     // Allocate host matrix C
     dim3 dimsC(dimsB.x, dimsA.y, 1);
-    unsigned int mem_size_C = dimsC.x * dimsC.y * sizeof(float);
-    float *h_C = (float *) malloc(mem_size_C);
+    unsigned int mem_size_C = dimsC.x * dimsC.y * sizeof(double);
+    double *h_C = (double *) malloc(mem_size_C);
 
     if (h_C == NULL)
     {

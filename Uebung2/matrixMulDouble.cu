@@ -43,7 +43,7 @@ matrixMulCUDA(float *C, float *A, float *B, int wA, int wB)
 {
 // FIXME
 
-	float Cvalue = 0;
+	double Cvalue = 0;
 
 	int row = blockIdx.y * blockDim.y + threadIdx.y;
 	int col = blockIdx.x * blockDim.x + threadIdx.x;

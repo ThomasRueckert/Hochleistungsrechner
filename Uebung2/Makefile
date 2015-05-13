@@ -5,11 +5,14 @@ CUDACC := nvcc
 CUDACC_FLAGS :=
 
 ########## Build Rules #################
-all: matrixMulFloat
+all: matrixMulFloat matrixMulDouble
 
 clean: 
 	rm -f matrixMulFloat
+	rm -f matrixMulDouble
 
 matrixMulFloat: matrixMulFloat.cu
 	$(CUDACC) $(CUDACC_FLAGS) $< -o $@
 
+matrixMulDouble: matrixMulDouble.cu
+	$(CUDACC) $(CUDACC_FLAGS) $< -o $@

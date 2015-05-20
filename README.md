@@ -5,3 +5,4 @@
 
 * Uebung 1: https://www.tu-chemnitz.de/informatik/RA/lehre/hochleistungsrechner/unterlagen/CUDA_uebung1_SS14.pdf
 * Uebung 2: https://www.tu-chemnitz.de/informatik/RA/lehre/hochleistungsrechner/unterlagen/CUDA_uebung2_SS14.pdf
+* Uebung 3: https://www.tu-chemnitz.de/informatik/RA/lehre/hochleistungsrechner/unterlagen/CUDA_uebung3_SS14.pdf

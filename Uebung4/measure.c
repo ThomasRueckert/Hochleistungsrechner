@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>		/* atoi() */
 #include <errno.h>		/* ENOMEM */
-#include <getopt.h>
+#include <getopt.h> 
 #include <sys/time.h>		/* gettimeofday() */
 
 #define MAX_MEM_SIZE_H2D (1 << 28)	/* 256 MiBytes */
@@ -163,9 +163,9 @@ cl_int initPlatform(cl_platform_id * platid, unsigned int platnr)
 	cl_platform_id *platforms = NULL;
 
 	// Determine number of OpenCL platforms
-	err = /* FIXME */ ;
+	err = clGetPlatformIDs(0, NULL, &num_platforms);
 	if (CL_SUCCESS != err) {
-		printf("%s:%d - FIXME() failed!\n", __FILE__, __LINE__);
+		printf("%s:%d - clGetPlatformIDs() failed!\n", __FILE__, __LINE__);
 		return err;
 	}
 
@@ -176,9 +176,10 @@ cl_int initPlatform(cl_platform_id * platid, unsigned int platnr)
 	}
 
 	if (0 == platnr) {	/* We will use the first/default platform */
-		err = /* FIXME */ ;
+		
+		err = clGetPlatformIDs(num_platforms, platforms, NULL);
 		if (CL_SUCCESS != err) {
-			printf("%s:%d - Default FIXME() failed!\n",
+			printf("%s:%d - Default clGetPlatformIDs() failed!\n",
 			       __FILE__, __LINE__);
 			return err;
 		}
@@ -197,14 +198,14 @@ cl_int initPlatform(cl_platform_id * platid, unsigned int platnr)
 		    (cl_platform_id *) malloc(num_platforms *
 					      sizeof(cl_platform_id));
 		if (NULL == platforms) {
-			printf("%s:%d - malloc() for FIXME() failed!\n",
+			printf("%s:%d - malloc() for platforms failed!\n",
 			       __FILE__, __LINE__);
 			return ENOMEM;
 		}
-
-		err = /* FIXME */ ;
+		  
+		err = clGetPlatformIDs(num_platforms, platforms, NULL);
 		if (CL_SUCCESS != err) {
-			printf("%s:%d - Selected FIXME() failed!\n",
+			printf("%s:%d - Selected clGetPlatformIDs() failed!\n",
 			       __FILE__, __LINE__);
 			free(platforms);
 			return err;
@@ -226,9 +227,9 @@ cl_int initDevice(cl_platform_id * platid, cl_device_id * devid,
 	cl_device_id *devices = NULL;
 
 	// Determine number of OpenCL devices in this platform
-	err = /* FIXME */ ;
+	err = clGetDeviceIDs(*platid, CL_DEVICE_TYPE_ALL, 0 ,devices, num_devices);
 	if (CL_SUCCESS != err) {
-		printf("%s:%d - FIXME() failed!\n", __FILE__, __LINE__);
+		printf("%s:%d - clGetDeviceIDs() failed!\n", __FILE__, __LINE__);
 		return err;
 	}
 
@@ -239,9 +240,9 @@ cl_int initDevice(cl_platform_id * platid, cl_device_id * devid,
 	}
 
 	if (0 == devnr) {	/* We will use the first/default device */
-		err = /* FIXME */ ;
+		err = clGetDeviceIDs(platid, CL_DEVICE_TYPE_ALL, num_devices ,devices, NULL);
 		if (CL_SUCCESS != err) {
-			printf("%s:%d - Default FIXME() failed!\n",
+			printf("%s:%d - Default clGetDeviceInfo() failed!\n",
 			       __FILE__, __LINE__);
 			return err;
 		}
@@ -259,14 +260,14 @@ cl_int initDevice(cl_platform_id * platid, cl_device_id * devid,
 		    (cl_device_id *) malloc(num_devices *
 					    sizeof(cl_device_id));
 		if (NULL == devices) {
-			printf("%s:%d - malloc() for FIXME() failed!\n",
+			printf("%s:%d - malloc() for devices failed!\n",
 			       __FILE__, __LINE__);
 			return ENOMEM;
 		}
 
-		err = /* FIXME */ ;
+		err =  clGetDeviceIDs(platid, CL_DEVICE_TYPE_ALL, num_devices ,devices, NULL);
 		if (CL_SUCCESS != err) {
-			printf("%s:%d - Selected FIXME() failed!\n",
+			printf("%s:%d - Selected devnr failed!\n",
 			       __FILE__, __LINE__);
 			free(devices);
 			return err;
@@ -286,9 +287,9 @@ cl_int initContext(cl_device_id * devid, cl_context * devctx)
 	cl_int err = CL_SUCCESS;
 
 	/* Create context for device */
-	*devctx = /* FIXME */ ;
+	*devctx = clCreateContext(NULL, 1, &devid, NULL, NULL, NULL);
 	if (CL_SUCCESS != err) {
-		printf("%s:%d - FIXME() failed!\n", __FILE__, __LINE__);
+		printf("%s:%d - clCreateContext() failed!\n", __FILE__, __LINE__);
 		return err;
 	}
 
@@ -362,7 +363,7 @@ cl_int measureBandwidth(cl_device_id * devid, cl_context * devctx)
 	/* Create command queue for device and context */
 	queue = clCreateCommandQueue(devctx, devid, 0, err);
 	if (CL_SUCCESS != err) {
-		printf("%s:%d - FIXME() failed!\n", __FILE__, __LINE__);
+		printf("%s:%d - clCreateCommandQueue() failed!\n", __FILE__, __LINE__);
 		return err;
 	}
 
@@ -407,7 +408,7 @@ cl_int measureBandwidthH2D(cl_context * devctx, cl_command_queue * devq)
 	size_t sz = 0;
 
 	for (sz = 1; sz <= MAX_MEM_SIZE_H2D; sz = sz << 1) {
-		if (CL_SUCCESS != FIXME(devctx, devq, sz))
+		if (CL_SUCCESS != measureBandwidthH2Dsized(devctx, devq, sz))
 			break;
 	}
 
@@ -421,7 +422,7 @@ cl_int measureBandwidthD2H(cl_context * devctx, cl_command_queue * devq)
 	size_t sz = 0;
 
 	for (sz = 1; sz <= MAX_MEM_SIZE_D2H; sz = sz << 1) {
-		if (CL_SUCCESS != FIXME(devctx, devq, sz))
+		if (CL_SUCCESS != measureBandwidthD2Hsized(devctx, devq, sz))
 			break;
 	}
 
@@ -435,7 +436,7 @@ cl_int measureBandwidthD2D(cl_context * devctx, cl_command_queue * devq)
 	size_t sz = 0;
 
 	for (sz = 1; sz <= MAX_MEM_SIZE_D2D; sz = sz << 1) {
-		if (CL_SUCCESS != FIXME(devctx, devq, sz))
+		if (CL_SUCCESS != measureBandwidthD2Dsized(devctx, devq, sz))
 			break;
 	}
 
@@ -469,7 +470,7 @@ cl_int measureBandwidthH2Dsized(cl_context * devctx,
 	}
 
 	/* Create device buffer */
-	ddata = /* FIXME */ ;
+	ddata = clCreateBuffer (devctx, CL_MEM_READ_WRITE, size, hdata, err);
 	if (CL_SUCCESS != err) {
 		printf("%s:%d - FIXME() failed!\n", __FILE__, __LINE__);
 		free(hdata);
@@ -477,7 +478,7 @@ cl_int measureBandwidthH2Dsized(cl_context * devctx,
 	}
 
 	/* Synchronize */
-	err = /* FIXME */ ;
+	err = clFinish(devq);
 	if (CL_SUCCESS != err) {
 		printf("%s:%d - clFinish() failed!\n", __FILE__, __LINE__);
 		free(hdata);
@@ -490,7 +491,7 @@ cl_int measureBandwidthH2Dsized(cl_context * devctx,
 
 	/* Copy data from host to device */
 	for (i = 0; i < ITERATIONS; i++) {
-		err =		/* FIXME */
+		err = clEnqueueWriteBuffer(devq, ddata, CL_TRUE, 0, 0, hdata, NULL, NULL, NULL);
 		    if (CL_SUCCESS != err) {
 			printf("%s:%d - clEnqueueFIXMEBuffer() failed!\n",
 			       __FILE__, __LINE__);
@@ -552,7 +553,7 @@ cl_int measureBandwidthD2Hsized(cl_context * devctx,
 	}
 
 	/* Create device buffer */
-	ddata = /* FIXME */ ;
+	ddata = clCreateBuffer (devctx, CL_MEM_READ_WRITE, size, hdata, err);
 	if (CL_SUCCESS != err) {
 		printf("%s:%d - FIXME() failed!\n", __FILE__, __LINE__);
 		free(hdata);
@@ -560,7 +561,7 @@ cl_int measureBandwidthD2Hsized(cl_context * devctx,
 	}
 
 	/* Initialize device memory with host buffer */
-	err = /* FIXME */ ;
+	err = /* FIXME */;
 	if (CL_SUCCESS != err) {
 		printf("%s:%d - clEnqueueFIXMEBuffer() failed!\n",
 		       __FILE__, __LINE__);
@@ -644,7 +645,7 @@ cl_int measureBandwidthD2Dsized(cl_context * devctx,
 	}
 
 	/* Create device source buffer */
-	dsource = /* FIXME */ ;
+	dsource = clCreateBuffer (devctx, CL_MEM_READ_WRITE, size, hdata, err);
 	if (CL_SUCCESS != err) {
 		printf("%s:%d - FIXME() failed!\n", __FILE__, __LINE__);
 		free(hdata);
@@ -652,7 +653,7 @@ cl_int measureBandwidthD2Dsized(cl_context * devctx,
 	}
 
 	/* Create device destination buffer */
-	ddest = /* FIXME */ ;
+	ddest = /* FIXME */;
 	if (CL_SUCCESS != err) {
 		printf("%s:%d - FIXME() failed!\n", __FILE__, __LINE__);
 		clReleaseMemObject(dsource);
@@ -661,7 +662,7 @@ cl_int measureBandwidthD2Dsized(cl_context * devctx,
 	}
 
 	/* Initialize device source buffer with host buffer data */
-	err = /* FIXME */ ;
+	err = clFinish(devq);
 	if (CL_SUCCESS != err) {
 		printf("%s:%d - FIXME() failed!\n", __FILE__, __LINE__);
 		clReleaseMemObject(ddest);

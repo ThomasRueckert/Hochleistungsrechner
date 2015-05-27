@@ -360,7 +360,7 @@ cl_int measureBandwidth(cl_device_id * devid, cl_context * devctx)
 	cl_command_queue queue;
 
 	/* Create command queue for device and context */
-	queue = /* FIXME */ ;
+	queue = clCreateCommandQueue(devctx, devid, 0, err);
 	if (CL_SUCCESS != err) {
 		printf("%s:%d - FIXME() failed!\n", __FILE__, __LINE__);
 		return err;

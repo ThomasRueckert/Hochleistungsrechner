@@ -125,7 +125,7 @@ color_t calculate(double x, double y)
 
 int main()
 {
-  printf("starting\n");
+
   
 	char const outputFileName[] = "output.bmp";
 
@@ -140,9 +140,11 @@ int main()
 	double dx = (xmax - xmin) / width ;
 	double dy = (ymax - ymin) / height; 
 	
+	#pragma omp parallel for ordered
 	for (unsigned int i = 0; i < height; i++)
 	{
 		double jy = ymin + i * dy;
+		#pragma omp ordered
 		for (unsigned int j = 0; j < width; j++)
 		{
 			double jx = xmin + j * dx;
@@ -157,5 +159,5 @@ int main()
 
 	fclose(outputFile);
 
-	return 0;
+	//return 0;
 }

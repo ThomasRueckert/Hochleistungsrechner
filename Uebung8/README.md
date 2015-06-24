@@ -2,9 +2,11 @@
 
 ## Run programm on TurboTUC (Xeon Phi)
 
+* ssh turbotuc-6
+
 ### load module for compiler
 
-* module load intel/14.0.3
+* module load intel/15.0.2
 
 ### compile with icc
 

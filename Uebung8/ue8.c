@@ -267,10 +267,10 @@ int main(int argc, char *argv[])
 	printf("Length of each time step:              %.4lf\n", timeStepLength);
 	printf("\n" );
 
-	#pragma offload target(mic) out(threads)
-	{
-		threads = omp_get_max_threads();
-	}
+// 	#pragma offload target(mic) out(threads)
+// 	{
+// 		threads = omp_get_max_threads();
+// 	}
 
 	printf("Number of threads available:           %u\n", threads);
 	printf("\n");
@@ -283,6 +283,7 @@ int main(int argc, char *argv[])
 	// Compute the forces and energies
 	printf("Computing initial forces and energies ...\n");
 
+	#pragma omp parallel for
 	for(unsigned int particle = 0; particle < particles; particle++)
 	{
 		__compute (particle, particles, dimensions, positions, velocities, mass, forces, &potentialEnergy, &kineticEnergy);
@@ -311,6 +312,7 @@ int main(int argc, char *argv[])
 
 	startTime = omp_get_wtime();
 
+	#pragma omp parallel for
 	for (unsigned int timeStep = 1; timeStep <= timeSteps; timeStep++)
 	{
 		potentialEnergy = 0;

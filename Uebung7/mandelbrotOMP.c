@@ -131,6 +131,8 @@ int main()
 
 	unsigned int width = 10000;
 	unsigned int height = 10000;
+	
+	color_t colors[width];
 
 	FILE *outputFile = fopen(outputFileName,"w");
 

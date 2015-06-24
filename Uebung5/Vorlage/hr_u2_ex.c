@@ -26,10 +26,9 @@
 #include <errno.h>		/* ENOMEM */
 #include <sys/time.h>		/* gettimeofday() */
 
-#define DEBUG 0
-#define ARRAYSIZEx 1<<8
-#define ARRAYSIZEy 1<<8
-/*
+#define DEBUG 1
+#define ARRAYSIZE 1<<16
+
 const char oclKernelName[] = "vectorAddition";
 const char *oclKernelSource[] = {
 	"__kernel void vectorAddition(const __global int* a,\n"
@@ -40,24 +39,6 @@ const char *oclKernelSource[] = {
 	"      c[gid] = a[gid] + b[gid];\n"
 	"}\n"
 };
-*/
-const char oclKernelName[] = "matrixAddition";
-const char *oclKernelSource[] = {
-	"__kernel void matrixAddition(const __global float *a,\n"
-	"                             const __global float *b,\n"
-	"                                   __global float *c)\n"
-	"{\n"
-	"      unsigned int gid0 = get_global_id(0);\n"
-	"      unsigned int gid1 = get_global_id(1);\n"
-	"      unsigned int gid = gid0*get_global_size(0)+gid1;\n"
-	"      c[gid] = a[gid] + b[gid];\n"
-	"}\n"
-};
-
-/*
-get_group_id(0)
-get_local_id(1)
-*/
 const char oclBuildOpts[] = { "-Werror" };
 
 cl_int showDeviceInfo(cl_device_id *);
@@ -65,9 +46,9 @@ double stopwatch(void);
 
 int main(int argc, char *argv[])
 {
-	int i, j;
+	int i;
 	char oclBuildLog[1024];
-	float hostVecA[ARRAYSIZEx][ARRAYSIZEy], hostVecB[ARRAYSIZEx][ARRAYSIZEy], hostVecC[ARRAYSIZEx][ARRAYSIZEy], hostVecC2[ARRAYSIZEx][ARRAYSIZEy];
+	int *hostVecA, *hostVecB, *hostVecC;
 
 	cl_int oclErr = CL_SUCCESS;
 	cl_platform_id oclPlatform;
@@ -84,27 +65,12 @@ int main(int argc, char *argv[])
 		0
 	};
 	cl_mem oclMemVecA, oclMemVecB, oclMemVecC;
-	size_t oclGlobalWorkSize[2];
-	oclGlobalWorkSize[0] = ARRAYSIZEx;
-	oclGlobalWorkSize[1] = ARRAYSIZEy;
+	size_t oclGlobalWorkSize = ARRAYSIZE;
 
-	/* Allocate host memory for input and output *//*
-	hostVecA = (float *) malloc(sizeof(float*)*ARRAYSIZEx);
-	for (i = 0; i < ARRAYSIZEx; i++) {
-	  hostVecA[i] = (float) malloc(sizeof(float)*ARRAYSIZEy);
-	}	
-	hostVecB = (float *) malloc(sizeof(float*)*ARRAYSIZEx);
-	for (i = 0; i < ARRAYSIZEx; i++) {
-	  hostVecB[i] = (float) malloc(sizeof(float)*ARRAYSIZEy);
-	}
-	hostVecC = (float *) malloc(sizeof(float*)*ARRAYSIZEx);
-	for (i = 0; i < ARRAYSIZEx; i++) {
-	  hostVecC[i] = (float ) malloc(sizeof(float)*ARRAYSIZEy);
-	}
-	hostVecC2 = (float *) malloc(sizeof(float*)*ARRAYSIZEx);
-	for (i = 0; i < ARRAYSIZEx; i++) {
-	  hostVecC2[i] = (float) malloc(sizeof(float)*ARRAYSIZEy);
-	}*/
+	/* Allocate host memory for input and output */
+	hostVecA = (int *) malloc(sizeof(int)*ARRAYSIZE);
+	hostVecB = (int *) malloc(sizeof(int)*ARRAYSIZE);
+	hostVecC = (int *) malloc(sizeof(int)*ARRAYSIZE);
 
 	if ((NULL == hostVecA) || (NULL == hostVecB) || (NULL == hostVecC)) {
 		printf
@@ -112,13 +78,11 @@ int main(int argc, char *argv[])
 		 __FILE__, __LINE__);
 		return -ENOMEM;
 	}
-	
+
 	/* Initialize memory */
-	for (i = 0; i < ARRAYSIZEx; i++) {
-	  for (j = 0; j < ARRAYSIZEy; j++) {
-		hostVecA[i][j] = i%100;
-		hostVecB[i][j] = (100-i)%100;
-	  }
+	for (i = 0; i < ARRAYSIZE; i++) {
+		hostVecA[i] = i%100;
+		hostVecB[i] = (100-i)%100;
 	}
 
 	/* Select first platform */
@@ -233,19 +197,19 @@ int main(int argc, char *argv[])
 	}
 
 	/* Create input/output memory objects from host memory */
-	oclMemVecA = clCreateBuffer(oclContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*ARRAYSIZEx*ARRAYSIZEy, hostVecA, &oclErr);
+	oclMemVecA = clCreateBuffer(oclContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int)*ARRAYSIZE, hostVecA, &oclErr);
 	if (CL_SUCCESS != oclErr) {
 		printf("%s:%d - clCreateBuffer() returned %d - failed!\n",
 		       __FILE__, __LINE__, oclErr);
 		return -1;
 	}
-	oclMemVecB = clCreateBuffer(oclContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*ARRAYSIZEx*ARRAYSIZEy, hostVecB, &oclErr);
+	oclMemVecB = clCreateBuffer(oclContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int)*ARRAYSIZE, hostVecB, &oclErr);
 	if (CL_SUCCESS != oclErr) {
 		printf("%s:%d - clCreateBuffer() returned %d - failed!\n",
 		       __FILE__, __LINE__, oclErr);
 		return -1;
 	}
-	oclMemVecC = clCreateBuffer(oclContext, CL_MEM_WRITE_ONLY, sizeof(float)*ARRAYSIZEx*ARRAYSIZEy, NULL, &oclErr);
+	oclMemVecC = clCreateBuffer(oclContext, CL_MEM_WRITE_ONLY, sizeof(int)*ARRAYSIZE, NULL, &oclErr);
 	if (CL_SUCCESS != oclErr) {
 		printf("%s:%d - clCreateBuffer() returned %d - failed!\n",
 		       __FILE__, __LINE__, oclErr);
@@ -263,7 +227,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Execute the kernel one dimensional */
-	oclErr = clEnqueueNDRangeKernel(oclCommandQueue, oclKernel, 2, NULL, oclGlobalWorkSize, NULL, 0, NULL, NULL);
+	oclErr = clEnqueueNDRangeKernel(oclCommandQueue, oclKernel, 1, NULL, &oclGlobalWorkSize, NULL, 0, NULL, NULL);
 	if (CL_SUCCESS != oclErr) {
 		printf("%s:%d - clEnqueueNDRangeKernel() returned %d - failed!\n",
 		       __FILE__, __LINE__, oclErr);
@@ -271,69 +235,37 @@ int main(int argc, char *argv[])
 	}
 
 	/* Read the results back to the host memory */
-	oclErr = clEnqueueReadBuffer(oclCommandQueue, oclMemVecC, CL_TRUE, 0, sizeof(float)*ARRAYSIZEx*ARRAYSIZEy, hostVecC, 0, NULL, NULL);
+	oclErr = clEnqueueReadBuffer(oclCommandQueue, oclMemVecC, CL_TRUE, 0, sizeof(int)*ARRAYSIZE, hostVecC, 0, NULL, NULL);
 	if (CL_SUCCESS != oclErr) {
 		printf("%s:%d - clEnqueueReadBuffer() returned %d - failed!\n",
 		       __FILE__, __LINE__, oclErr);
 		return -1;
 	}
 
-	int failure = 0;
-	for (i = 0; i < ARRAYSIZEx; i++) {
-	    for (j = 0; j < ARRAYSIZEy; j++) {
-		hostVecC2[i][j] = hostVecA[i][j] + hostVecB[i][j];
-		if (hostVecC2[i][j] != hostVecC[i][j]) {
-		    printf("Error in Result at pos %d,%d\n",i,j);
-		    failure++;
-		}
-	    }
-	}
-	if (failure) {
-	 printf("%d Fehler\n", failure);  
-	} else {
-	 printf("Berechnung korrekt\n"); 
-	}
-	
 #if DEBUG
 	printf("hostVecA: ");
-	for (i = 0; i < ARRAYSIZEx; i++) {
-	  for (j = 0; j < ARRAYSIZEy; j++) {
-	    	printf("%.3f\t", hostVecA[i][j]);
-	  }
+	for (i = 0; i < 20; i++) {
+		printf("%d\t", hostVecA[i]);
 	}
 	printf("\n");
 
 	printf("hostVecB: ");
-	for (i = 0; i < ARRAYSIZEx; i++) {
-	  for (j = 0; j < ARRAYSIZEy; j++) {
-		printf("%.3f\t", hostVecB[i][j]);
-	  }
+	for (i = 0; i < 20; i++) {
+		printf("%d\t", hostVecB[i]);
 	}
 	printf("\n");
 
 	printf("hostVecC: ");
-	for (i = 0; i < ARRAYSIZEx; i++) {
-	  for (j = 0; j < ARRAYSIZEy; j++) {
-		printf("%.3f\t", hostVecC[i][j]);
-	  }
-	}
-	printf("\n");
-	
-	printf("hostVecC2: ");
-	for (i = 0; i < ARRAYSIZEx; i++) {
-	  for (j = 0; j < ARRAYSIZEy; j++) {
-		printf("%.3f\t", hostVecC2[i][j]);
-	  }
+	for (i = 0; i < 20; i++) {
+		printf("%d\t", hostVecC[i]);
 	}
 	printf("\n");
 #endif
-	
-	
 
 	/* Clean up */
-	//free(hostVecA);
-	//free(hostVecB);
-	//free(hostVecC);
+	free(hostVecA);
+	free(hostVecB);
+	free(hostVecC);
 	//printf("-- > %s:%d oclErr = %d < --\n", __FILE__, __LINE__, oclErr);
 #if DEBUG
 	printf("Exiting succesfully... \n");

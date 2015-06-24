@@ -126,11 +126,13 @@ color_t calculate(double x, double y)
 int main()
 {
 
-  
+  double start = omp_get_wtime( );
 	char const outputFileName[] = "output.bmp";
 
 	unsigned int width = 10000;
 	unsigned int height = 10000;
+
+//color_t colors[width][100];
 
 	FILE *outputFile = fopen(outputFileName,"w");
 
@@ -139,27 +141,33 @@ int main()
 	double xmin = 2.1, xmax = -0.6, ymin = -1.35, ymax = 1.35;
 	double dx = (xmax - xmin) / width ;
 	double dy = (ymax - ymin) / height; 
-	
-	#pragma omp parallel for ordered
 	for (unsigned int i = 0; i < height; i++)
 	{
+	  color_t colors[width];
 		double jy = ymin + i * dy;
-		#pragma omp ordered
-		#pragma omp parallel for ordered
+		
+		#pragma omp parallel for schedule(dynamic,1)
 		for (unsigned int j = 0; j < width; j++)
-		{
+		{	  
 			double jx = xmin + j * dx;
+			colors[j] = calculate(jx, jy);
+		}
+		
 
-			color_t color = calculate(jx, jy);
+		  for (unsigned int j = 0; j < width; j++)
+		  {
 
-			#pragma omp ordered
-			fwrite(&color.b, 1, 1, outputFile);
-			fwrite(&color.g, 1, 1, outputFile);
-			fwrite(&color.r, 1, 1, outputFile);
-		}		
+			    fwrite(&colors[j].b, 1, 1, outputFile);
+			    fwrite(&colors[j].g, 1, 1, outputFile);
+			    fwrite(&colors[j].r, 1, 1, outputFile);
+		    }
+
 	}
 
 	fclose(outputFile);
+double end = omp_get_wtime( );
 
-	//return 0;
+	printf("%f\n", end - start);
+
+	return 0;
 }

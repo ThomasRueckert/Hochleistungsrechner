@@ -9,45 +9,48 @@
 __attribute__((target(mic)))
 double calculateArea (double a, double b, unsigned long long N) 
 {
-	double dx = (b - a) / (double) N;
 	double area = 0;
 	//custom
 	double sum = 0;
- 	double x1 = 0;
- 	double x2 = 0;
+ 	double x1 = a;
+ 	double x2 = a;
 	double y1 = 0;
  	double y2 = 0;
 
+	area = ((b-a)/(2*N));
+	double baN = (b-a)/N;
+	
 	#ifdef __MIC__
-		// FIXME 3. u. 5. Aufgabe
-	      area = ((b-a)/(2*N));
 		
+#pragma offload target(mic)		
+#pragma omp parallel for schedule(dynamic, 20000) reduction(+:sum) private(x1,x2,y1,y2)
 		for (unsigned long long i = 0; i < N; i++) {
 		    
-		    x1 = (i*((b-a)/N)) + a;
-		    x2 = ((i+1)*((b-a)/N)) + a;
+		    x1 = i*baN + a;
+		    x2 = x1 + baN;
 		    
-		    y1 = pow(x1, 3) - 2*(pow(x1, 2)) - x1 + 3;
-		    y2 = pow(x2, 3) - 2*(pow(x2, 2)) - x2 + 3;
+		      y1 = pow(x1, 3) - 2*(pow(x1,2)) -x1+ 3;
+		      y2 = pow(x2, 3) - 2*(pow(x2,2)) -x2+ 3;
 		    
 		    sum += (y1+y2);
 		}
-		pow(x1, 3) - 2*(pow(x1, 2)) + 3;
+
 		area *= sum;
+		// FIXME 3. u. 5. Aufgabe
 	#else
-		area = ((b-a)/(2*N));
 		
+#pragma omp parallel for schedule(dynamic, 10000) reduction(+:sum) private(x1,x2,y1,y2)
 		for (unsigned long long i = 0; i < N; i++) {
 		    
-		    x1 = (i*((b-a)/N)) + a;
-		    x2 = ((i+1)*((b-a)/N)) + a;
+		    x1 = i*baN + a;
+		    x2 = x1 + baN;
 		    
-		    y1 = pow(x1, 3) - 2*(pow(x1, 2)) - x1 + 3;
-		    y2 = pow(x2, 3) - 2*(pow(x2, 2)) - x2 + 3;
+		      y1 = pow(x1, 3) - 2*(x1*x1) -x1+ 3;
+		      y2 = pow(x2, 3) - 2*(x2*x2) -x2+ 3;
 		    
 		    sum += (y1+y2);
 		}
-		pow(x1, 3) - 2*(pow(x1, 2)) + 3;
+
 		area *= sum;
 	#endif
 

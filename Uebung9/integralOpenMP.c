@@ -22,14 +22,14 @@ double calculateArea (double a, double b, unsigned long long N)
 		area = ((b-a)/(2*N));
 		
 #pragma offload target(mic)		
-#pragma omp parallel for schedule(dynamic, 10000) shared(i,sum,a,b,N) private(x1,x2,y1,y2)
-		for (int i = 0; i < N; i++) {
+#pragma omp parallel for schedule(dynamic, 10000) reduction(+:sum) private(x1,x2,y1,y2)
+		for (unsigned long long i = 0; i < N; i++) {
 		    
 		    x1 = (i*((b-a)/N)) + a;
 		    x2 = ((i+1)*((b-a)/N)) + a;
 		    
-		    y1 = pow(x1, 3) - 2*(pow(x1, 2)) + 3;
-		    y2 = pow(x2, 3) - 2*(pow(x2, 2)) + 3;
+		    y1 = pow(x1, 3) - 2*(pow(x1, 2)) -x1 + 3;
+		    y2 = pow(x2, 3) - 2*(pow(x2, 2)) -x2 + 3;
 		    
 		    sum += (y1+y2);
 		}
@@ -39,14 +39,14 @@ double calculateArea (double a, double b, unsigned long long N)
 	#else
 		area = ((b-a)/(2*N));
 		
-#pragma omp parallel for schedule(dynamic, 10000) shared(i,sum,a,b,N) private(x1,x2,y1,y2)
-		for (int i = 0; i < N; i++) {
+#pragma omp parallel for schedule(dynamic, 10000) shared(sum,a,b,N) private(x1,x2,y1,y2)
+		for (unsigned long long i = 0; i < N; i++) {
 		    
 		    x1 = (i*((b-a)/N)) + a;
 		    x2 = ((i+1)*((b-a)/N)) + a;
 		    
-		    y1 = pow(x1, 3) - 2*(pow(x1, 2)) + 3;
-		    y2 = pow(x2, 3) - 2*(pow(x2, 2)) + 3;
+		    y1 = pow(x1, 3) - 2*(pow(x1, 2)) -x1 + 3;
+		    y2 = pow(x2, 3) - 2*(pow(x2, 2)) -x2 + 3;
 		    
 		    sum += (y1+y2);
 		}
